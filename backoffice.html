@@ -212,7 +212,7 @@
                             <td>${Movie.name}</td>
                             <td>${Movie.category}</td>
                             <td>
-            <a href="edit-movie.html?movieId=${Movie._id}" class="btn btn-outline-success">Edit</a>
+            <a href="edit-movie.html?movieId=${Movie._id}&name=${Movie.name}&description=${Movie.description}&category=${Movie.category}&imageUrl=${Movie.imageUrl}" class="btn btn-outline-success">Edit</a>
             <a href="backoffice.html?movieId=${Movie._id}" class="btn btn-outline-danger">Delete</a>
                 </td>
                         </tr>`
