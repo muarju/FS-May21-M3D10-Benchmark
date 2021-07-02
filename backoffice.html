@@ -120,13 +120,14 @@
     </nav>
     <section  class="mt-5">
         
-        <div class="container">
+        <div class="container bg-light">
             <div class="row">
                 <div class="col-12">
-                    <h3 class="text-light mt-2 mb-2">Manage Movies</h3>
+                    <h3 class=" mt-2 mb-2">Manage Movies</h3>
                     <a href="add-movie.html" class="btn btn-secondary mb-3 float-end">Add New Movie</a>
                 <div id="msg"></div>
-                <table id="movies" class="display w-100">
+                <h4 class="">Horror Movies</h4>
+                <table id="HorrorMoviees" class="display w-100">
                     <thead>
                         <tr>
                             <th>SN</th>
@@ -136,7 +137,23 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="movies-list">
+                    <tbody id="HorrorMovieesBody">
+
+                    </tbody>
+                </table>
+                <h4 class="">Comedies Movies</h4>
+                <table id="Comedies" class="display w-100">
+                    <thead>
+                        <tr>
+                            <th>SN</th>
+                            <th>Photo</th>
+                            <th>Movie Name</th>
+                            <th>Category</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ComediesBody">
+
                     </tbody>
                 </table>
                 </div>
@@ -145,9 +162,7 @@
     </section>
    
     <script>
-        let moviesList=[]
-
-         const getCategories = async (url) => {
+        const getMovies = async (url) => {
             try {
                 const response = await fetch(url,{
                     headers:{
@@ -156,58 +171,113 @@
                 })
                 if (!response.ok) throw new Error("Failed to fetch")
 
-                const getCategories = await response.json()
-                return getCategories
+                const Movies = await response.json()
+                return Movies
 
             } catch (err) {
                 console.log(err)
             }
         }
 
-        const getMovies = (movieCategories)=>{
-
-            movieCategories.forEach(category => {
-                
-                const url= "https://striveschool-api.herokuapp.com/api/movies/" + category
-
-                fetch(url,{
-                    headers:{
-                        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGRjNWY0NmIzNTgxNzAwMTVjMjI3MDYiLCJpYXQiOjE2MjUwNTUwNDYsImV4cCI6MTYyNjI2NDY0Nn0.zt5Uci2iQ5gwOgdwd6hot0bdFZUauPo7-NFbW5n82_g"
-                    }
-                })
-                .then(response => response.json())
-                .then(charData => {
-                charData.map(entry => {
-                return moviesList.push(entry);
-                });
-                let mydata=JSON.stringify(moviesList, null, 2)
-                console.log(mydata)
-                })
-                .catch(console.log)
-
+        const displayMovies = (Movies) => {
+        const HorrorMoviees = document.getElementById("HorrorMovieesBody")
+        let tr=""
+        let count=1
+        if (Movies.length > 0) {
+            Movies.forEach(Movie => {
+                tr +=`<tr>
+                            <td>${count++}</td>
+                            <td><img src="${Movie.imageUrl}" height="80px"></td>
+                            <td>${Movie.name}</td>
+                            <td>${Movie.category}</td>
+                            <td>
+            <a href="edit-movie.html?movieId=${Movie._id}" class="btn btn-outline-success">Edit</a>
+            <a href="backoffice.html?movieId=${Movie._id}" class="btn btn-outline-danger">Delete</a>
+                </td>
+                        </tr>`
             })
+            HorrorMoviees.innerHTML=tr
+            }
+
         }
+        const displayComediesMovies = (Movies) => {
+        const ComediesBody = document.getElementById("ComediesBody")
+        let tr=""
+        let count=1
+        if (Movies.length > 0) {
+            Movies.forEach(Movie => {
+                tr +=`<tr>
+                            <td>${count++}</td>
+                            <td><img src="${Movie.imageUrl}" height="80px"></td>
+                            <td>${Movie.name}</td>
+                            <td>${Movie.category}</td>
+                            <td>
+            <a href="edit-movie.html?movieId=${Movie._id}" class="btn btn-outline-success">Edit</a>
+            <a href="backoffice.html?movieId=${Movie._id}" class="btn btn-outline-danger">Delete</a>
+                </td>
+                        </tr>`
+            })
+            ComediesBody.innerHTML=tr
+            }
 
-
-        const displayMovies = (mydata) => {
-            const movieListTable = document.getElementById("movies-list")
-           console.log(mydata)
         }
+        const deleteMovie = async (url)=>{
+            try {
+                const response = await fetch(url,{
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGRjNWY0NmIzNTgxNzAwMTVjMjI3MDYiLCJpYXQiOjE2MjUwNTUwNDYsImV4cCI6MTYyNjI2NDY0Nn0.zt5Uci2iQ5gwOgdwd6hot0bdFZUauPo7-NFbW5n82_g",
+                    },
+                });
+                if (!response.ok) throw new Error("Failed to fetch")
 
-        window.onload = async () => {
-            let url = "https://striveschool-api.herokuapp.com/api/movies/"
-           
+                const deleteConfirm = await response.json()
+                return deleteConfirm
 
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        const showmessage = (message)=>{
+            if(message){
+                const messagediv=document.querySelector("#msg")
+                messagediv.innerHTML=`
+                <div class="alert alert-danger" role="alert" style="">
+                  Movie ${message._id} deleted successfully
+                </div>
+                `
+                setTimeout(function(){
+                messagediv.innerHTML="";
+                },3000);
 
-            const movieCategories = await getCategories(url)
-            const myMovies = await getMovies(movieCategories)
-            if(moviesList){
-                displayMovies(moviesList)
             }
         }
 
+
+
+        window.onload = async () => {
+            let url = "https://striveschool-api.herokuapp.com/api/movies/"
+
+            let movieId = new URLSearchParams(window.location.search).get("movieId")
+            if(movieId){
+               const deleteurl="https://striveschool-api.herokuapp.com/api/movies/"+movieId
+                const deletethisMovie=await deleteMovie(deleteurl)
+                const showMessage= await showmessage(deletethisMovie)
+                const Movies = await getMovies(url)
+                displayMovies(Movies)
+            }
+            let horrorUrl= url+"Horror"
+            let ComediesUrl= url+"Comedies"
+            const Movies = await getMovies(horrorUrl)
+            const showMovies=await displayMovies(Movies)
+            const ComediesMovies = await getMovies(ComediesUrl)
+            const showComediesMovies=await displayComediesMovies(ComediesMovies)
+
+
+        }
         $(document).ready( function () {
-        $('#movies').DataTable();
+        $('#HorrorMoviees').DataTable();
+        $('#Comedies').DataTable();
         } );
     </script>
     
