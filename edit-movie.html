@@ -9,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link href="css/styles.css" rel="stylesheet">
-    <title>Add Movie | Netflix</title>
+    <title>Edit Movie | Netflix</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
@@ -101,7 +101,7 @@
     <div class="container">
         <div class="row">
             <div class="col-12 bg-light">
-                <h2 class="mt-5 mb-2">Add New Movie</h2>
+                <h2 class="mt-5 mb-2">Edit Movie</h2>
                 <div id="msg"></div>
                 <form id="addmovie">
                     <div class="mb-3">
@@ -126,49 +126,73 @@
         </div>
     </div>
     <script>
-        let movieId = new URLSearchParams(window.location.search).get("movieId")
-        console.log(movieId)
-        const url = "https://striveschool-api.herokuapp.com/api/movies/"+movieId
-           
-       const getMovies = async (url) => {
+       let movieId = new URLSearchParams(window.location.search).get("movieId")
+       let movieName = new URLSearchParams(window.location.search).get("name")
+       let moviedescription = new URLSearchParams(window.location.search).get("description")
+       let moviecategory = new URLSearchParams(window.location.search).get("category")
+       let movieimageUrl = new URLSearchParams(window.location.search).get("imageUrl")
+        const name = document.querySelector("#name")
+        name.setAttribute('value',movieName)
+
+        const description = document.querySelector("#description")
+        description.innerHTML=moviedescription
+
+        const category = document.querySelector("#category")
+        category.setAttribute('value',moviecategory)
+        
+        const imageUrl = document.querySelector("#imageUrl")
+        imageUrl.setAttribute('value',movieimageUrl)
+
+        async function postFormDataAsJson({ url, formData }) {
+            const plainFormData = Object.fromEntries(formData.entries());
+            const formDataJsonString = JSON.stringify(plainFormData);
+
+            const fetchOptions = {
+                method: "PUT",
+                headers: {
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGRjNWY0NmIzNTgxNzAwMTVjMjI3MDYiLCJpYXQiOjE2MjUwNTUwNDYsImV4cCI6MTYyNjI2NDY0Nn0.zt5Uci2iQ5gwOgdwd6hot0bdFZUauPo7-NFbW5n82_g",
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: formDataJsonString,
+            };
+
+            const response = await fetch(url, fetchOptions);
+
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                throw new Error(errorMessage);
+            }
+
+            return response.json();
+        }
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const form = event.currentTarget;
+           // const url = form.action;
+           const url="https://striveschool-api.herokuapp.com/api/movies/"+movieId
+
             try {
-                const response = await fetch(url,{
-                    headers:{
-                        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGRjNWY0NmIzNTgxNzAwMTVjMjI3MDYiLCJpYXQiOjE2MjUwNTUwNDYsImV4cCI6MTYyNjI2NDY0Nn0.zt5Uci2iQ5gwOgdwd6hot0bdFZUauPo7-NFbW5n82_g"
-                    }
-                })
-                if (!response.ok) throw new Error("Failed to fetch")
+                const formData = new FormData(form);
+                const responseData = await postFormDataAsJson({ url, formData });
 
-                const movies = await response.json()
-                return movies
+                console.log({ responseData });
+                const messagediv=document.querySelector("#msg")
+                messagediv.innerHTML=`
+                <div class="alert alert-success" role="alert" style="">
+                  product information update successfully
+                </div>
+                `
 
-            } catch (err) {
-                console.log(err)
+
+            } catch (error) {
+                console.error(error);
             }
         }
-
-        const displayMovieDetails = (movie) => {
-            console.log(movie)
-            const name = document.querySelector("#name")
-            name.setAttribute('value',movie.name)
-
-            const description = document.querySelector("#description")
-            description.innerHTML=movie.description
-
-            const category = document.querySelector("#category")
-            category.setAttribute('value',movie.category)
-            
-            const imageUrl = document.querySelector("#imageUrl")
-            imageUrl.setAttribute('value',movie.imageUrl)
-
-        }
-
-        window.onload = async () => {
-            const MovieData = await getMovies(url)
-            displayMovieDetails(MovieData)
-        }
-
-
+        const addProductForm = document.getElementById("addmovie");
+        addProductForm.addEventListener("submit", handleFormSubmit);
+        addProductForm.reset()
 
 
     </script>
